@@ -467,10 +467,10 @@ var startBtn = $("#chat-submit")[0];
             recognition.continuous = true;
             recognition.interimResults = true;
 
-            recognition.onresult = event => {
+            recognition.onresult = function (event) {
                 const last = event.results.length - 1;
                 const res = event.results[last];
-                const text = res[0].transcript;
+                const result = res[0].transcript;
                 if (res.isFinal) {
                     $('#chat-input').val(result);
                     setTimeout(function(){

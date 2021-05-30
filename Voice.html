@@ -454,17 +454,15 @@
 
 
         $(document).ready(function () {
+            let listening = false;
             startBtn.addEventListener('click', () => {
-                if (button.style['animation-name'] === 'flash') {
+                if (listening) {
                     recognition.stop();
-                    button.style['animation-name'] = 'none';
-                    button.innerText = 'Press to Start';
-                    content.innerText = '';
+                   
                 } else {
-                    button.style['animation-name'] = 'flash';
-                    button.innerText = 'Press to Stop';
                     recognition.start();
                 }
+                listening = !listening;
             });
 
             const content = document.getElementById('content');

@@ -7,12 +7,20 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!-- Bootstrap CSS -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
-		integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+		integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+		integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
 	<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.1/css/responsive.dataTables.min.css">
 	<style>
 		.list-group-item {
 			padding: 2px 4px;
+    height: 50px;
+    margin-bottom: 4px;
 		}
 
 		#list-tab {
@@ -21,25 +29,94 @@
 			box-shadow: 0 0 7px 0 #ccc;
 			padding: 1px;
 		}
+
+		.gly-ani {
+			animation: ani 2s infinite linear;
+			text-align: center;
+			left: calc(50% - 20px);
+			top: 50px;
+		}
+
+		@keyframes ani {
+			0% {
+				transform: rotate(0deg);
+			}
+
+			100% {
+				transform: rotate(359deg);
+			}
+		}
+
+		#view {
+			overflow-y: auto;
+			height: calc(100vh - 145px);
+		}
+
+		.dosage {
+			background: white;
+    display: flex;
+    float: right;
+    box-shadow: 2px 2px 2px 0 #ccc;
+    border: 1px solid #00685e;
+		}
+
+		.d1 {
+			width: 60px;
+			text-align: center;
+		}
+
+		.dosage span {
+			background: #009688;
+    padding: 0 5px;
+    float: left;
+    color: white;
+		}
+
+		.d2 {
+			width: 60px;
+			text-align: center;
+		}
+
+		.total {
+			width: 70px;
+			text-align: center;
+		}
 	</style>
 </head>
 
 <body>
-	<div class="container-fluid" style="padding:15px">
-		<div>
-			<span>Date <input type="date" id="date"></span>
+	<div class="container-fluid" style="padding:5px 15px">
+		<h4 style="text-align: center;background: #055da2;color: white;padding: 4px;">COVID Vaccination </h4>
+		<div class="row">
+			<div class="col-xs-6"><select id="district" class="form-control"></select></div>
+			<div class="col-xs-6"><input type="date" id="date" class="form-control"></div>
 		</div>
-		<div id="view"></div>
+		<div class="row">
+			<div class="col-xs-12" style=" display: flex; justify-content: space-around; margin: 10px 0; ">
+				<div class="btn btn-xs btn-filter btn-default btn-success">18+</div>
+				<div class="btn btn-xs btn-filter btn-default">45+</div>
+				<div class="btn btn-xs btn-filter btn-default">Free</div>
+				<div class="btn btn-xs btn-filter btn-default">Paid</div>
+				<div class="btn btn-xs btn-filter btn-default">Covaxin</div>
+				<div class="btn btn-xs btn-filter btn-default">Covishield</div>
+			</div>
+		</div>
+		<div id="view">
+			<span class="glyphicon glyphicon-refresh gly-ani" style="font-size:40px;"></span>
+		</div>
 	</div>
 
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"
 		integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
 		integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
-	</script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js"
-		integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT" crossorigin="anonymous">
-	</script>
+		</script>
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+		integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+		crossorigin="anonymous"></script>
 	<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
 	<script>
 		var selectedDistrict;
@@ -48,10 +125,7 @@
 		const Today = new Date()
 		const Tomorrow = new Date(Today)
 		Tomorrow.setDate(Tomorrow.getDate() + 1)
-		var districtList = [779, 555, 578, 565, 571, 778, 539, 547, 566, 556, 563, 552, 557, 544, 559, 780, 562, 540, 576,
-			558, 577, 564, 573, 570, 575, 546, 567, 781, 545, 561, 580, 551, 541, 569, 554, 560, 548, 550, 568, 572, 553,
-			574, 543, 542, 549
-		];
+		var districtList = [];
 
 		function getDate(date) {
 			var date = $('#date').val();
@@ -60,75 +134,68 @@
 		}
 
 		function render() {
-			var html = '<div class="row"><div class="col-sm-12">';
-			html += '<div class="table-response"><table class="table table-bordered table-hover table-striped" id="CenterTable"><thead>';
-			html += '<tr>';
-			//html += '<th><div class="td_head">center_id</div></th>';
-			html += '<th><div class="td_head">Name</div></th>';
-			html += '<th><div class="td_head">Vaccine</div></th>';
-			html += '<th><div class="td_head">Age</div></th>';
-			//html += '<th><div class="td_head">address</div></th>';
-			//html += '<th><div class="td_head">state_name</div></th>';
-			html += '<th><div class="td_head">district_name</div></th>';
-			//html += '<th><div class="td_head">block_name</div></th>';
-			//html += '<th><div class="td_head">pincode</div></th>';
-			//html += '<th><div class="td_head">from</div></th>';
-			//html += '<th><div class="td_head">to</div></th>';
-			//html += '<th><div class="td_head">lat</div></th>';
-			//html += '<th><div class="td_head">long</div></th>';
-			html += '<th><div class="td_head">Fee</div></th>';
-			//html += '<th><div class="td_head">session_id</div></th>';
-			html += '<th><div class="td_head">date</div></th>';
-			html += '<th><div class="td_head">Dosage 1</div></th>';
-			html += '<th><div class="td_head">Dosage 2</div></th>';
-			html += '<th><div class="td_head">Capacity</div></th>';
-			html += '<th><div class="td_head">Fee</div></th>';
-
-			//html += '<th><div class="td_head">slots</div></th>';
-			html += '</tr></thead><tbody>';
-
-			if (centers.length > 0) {
-				centers.forEach(function (e, i) {
-					if(e.available_capacity != 0 && e.min_age_limit == 18){
-					html += '<tr>';
-					//html += '<td><div class="td_head">'+e.center_id+'</div></td>';
-					html += '<td><div class="td_head" title="' + e.address + '-' + e.pincode + '">' + e
-						.name + '</div></td>';
-					html += '<td><div class="td_head">' + e.vaccine + '</div></td>';
-					html += '<td><div class="td_head">' + e.min_age_limit + '</div></td>';
-					//html += '<td><div class="td_head">'+e.address+'</div></td>';
-					//html += '<td><div class="td_head">'+e.state_name+'</div></td>';
-					html += '<td><div class="td_head">'+e.district_name+'</div></td>';
-					//html += '<td><div class="td_head">'+e.block_name+'</div></td>';
-					//html += '<td><div class="td_head">'+e.pincode+'</div></td>';
-					//html += '<td><div class="td_head">'+e.from+'</div></td>';
-					//html += '<td><div class="td_head">'+e.to+'</div></td>';
-					//html += '<td><div class="td_head">'+e.lat+'</div></td>';
-					//html += '<td><div class="td_head">'+e.long+'</div></td>';
-					html += '<td><div class="td_head">' + e.fee_type + '</div></td>';
-					//html += '<td><div class="td_head">'+e.session_id+'</div></td>';
-					html += '<td><div class="td_head">' + e.date + '</div></td>';
-					html += '<td><div class="td_head">' + e.available_capacity_dose1 + '</div></td>';
-					html += '<td><div class="td_head">' + e.available_capacity_dose2 + '</div></td>';
-					html += '<td><div class="td_head">' + e.available_capacity + '</div></td>';
-					html += '<td><div class="td_head">' + e.fee + '</div></td>';
-					/*
-					html += '<td class="td_row_even">';
-					html += '<table class="table table-bordered"><tbody>';
-					if(e.slots.length>0){
-						e.slots.forEach(function(el){
-							html +='<tr><td class="td_row_even"><div class="td_row_even">'+el+'</div></td></tr>';
-						})
-					}
-					html += '</tbody></table></td>';
-					*/
-					html += '</tr>';
-				}
+			var html = '';
+			/*//e.center_id+'</div></td>';
+			html += '<td><div class="td_head" title="' + e.address + '-' + e.pincode + '">' + e
+				.name + '</div></td>';
+			html += '<td><div class="td_head">' + e.vaccine + '</div></td>';
+			html += '<td><div class="td_head">' + e.min_age_limit + '</div></td>';
+			//e.address+'</div></td>';
+			//e.state_name+'</div></td>';
+			html += '<td><div class="td_head">' + e.district_name + '</div></td>';
+			//e.block_name+'</div></td>';
+			//e.pincode+'</div></td>';
+			//e.from+'</div></td>';
+			//e.to+'</div></td>';
+			//e.lat+'</div></td>';
+			//e.long+'</div></td>';
+			html += '<td><div class="td_head">' + e.fee_type + '</div></td>';
+			//e.session_id+'</div></td>';
+			html += '<td><div class="td_head">' + e.date + '</div></td>';
+			html += '<td><div class="td_head">' + e.available_capacity_dose1 + '</div></td>';
+			html += '<td><div class="td_head">' + e.available_capacity_dose2 + '</div></td>';
+			html += '<td><div class="td_head">' + e.available_capacity + '</div></td>';
+			html += '<td><div class="td_head">' + e.fee + '</div></td>';
+			
+			html += '<td class="td_row_even">';
+			html += '<table class="table table-bordered"><tbody>';
+			if(e.slots.length>0){
+				e.slots.forEach(function(el){
+					html +='<tr><td class="td_row_even"><div class="td_row_even">'+el+'</div></td></tr>';
 				})
 			}
-			html += '</tbody></table></div>'
-			html += '</div></div>'
+			html += '</tbody></table></td>';
+			*/
 
+			html = '';
+			if (centers.length > 0) {
+				html += '<ul class="list-group">';
+				centers.forEach(function (e, i) {
+					if (selectedDistrict == e.district_name) {
+					html += '<li class="list-group-item" title="' + e.address + '-' + e.pincode + '">';
+						var color = e.fee_type == 'Paid'? 'btn-danger':'btn-success';
+						html += '<div>' + e.name ;
+							html += '<span class="pull-right badge '+color+'">'+e.fee_type.charAt(0)+'</span>';
+							html +=  '</div>';
+					html += '<div class="pull-left">';
+						
+					color = e.min_age_limit == '18'? 'btn-success':'btn-warning';
+					html += '<span class="badge '+color+'">' + e.min_age_limit + '+</span>';
+					color = e.vaccine == 'COVAXIN'? 'btn-danger': 'btn-info';
+					html += '<span class="badge '+color+'">' + e.vaccine + '</span>';
+					html += '</div>';
+					html += '<div class="dosage">';
+					html += '<div class="d1"><span>D1</span>' + e.available_capacity_dose1 + '</div>';
+					html += '<div class="d2"><span>D1</span>' + e.available_capacity_dose2 + '</div>';
+					html += '<div class="total"><span>Total</span>' + e.available_capacity + '</div>';
+					html += '</div>';
+
+					html += '</li>';
+
+					}
+				})
+				html += '</ul>';
+			}
 			$('#view').empty().append(html);
 			$('#CenterTable').DataTable({
 				paging: true,
@@ -141,9 +208,8 @@
 			selectedDate = getDate(new Date());
 
 			districtList.forEach(function (e, ind) {
-				selectedDistrict = e;
 				$.getJSON("https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=" +
-					selectedDistrict + "&date=" + selectedDate,
+					e + "&date=" + selectedDate,
 					function (data) {
 						if (data.sessions) {
 							data.sessions.forEach(function (el) {
@@ -153,57 +219,64 @@
 
 						if (districtList.length == (ind + 1)) {
 							console.log(centers);
-							centers = centers.filter((v,i,a)=>a.findIndex(t=>(t.center_id === v.center_id))===i)
-							render();
+							centers = centers.filter((v, i, a) => a.findIndex(t => (t.center_id === v.center_id)) === i)
+
+							setTimeout(function () { render(); }, 1000);
 						}
+
+
 					}
 				)
 
 			})
 
 		}
-
+function onChangeDistrict(e){
+	selectedDistrict = e.target.options[e.target.selectedIndex].innerText;
+	render();
+    
+}
 		function getStateInformation(stateId) {
 			$.getJSON("https://cdn-api.co-vin.in/api/v2/admin/location/districts/" + stateId, function (data) {
 				var districts = data.districts || [];
 				var html = '';
-				html += '<div class="row">';
-				html +=
-					'<div class="col-3"><h4> Tamil Nadu</h4><div class="list-group" id="list-tab" role="tablist">';
-				var arr = [];
 				if (districts.length > 0) {
 					districts.forEach(function (e, i) {
-						arr.push(e.district_id)
-						var active = i == 0 ? 'active' : '';
-						html += '<a class="list-group-item list-group-item-action ' + active +
-							'" data-bs-toggle="list" href="#tab-content" role="tab" aria-controls="tab-content" index="' +
-							e.district_id + '">' + e.district_name + '</a>';
-					})
+						var selected = '';
+						if(e.district_id == 560){
+							selected ='selected';
+							selectedDistrict = e.district_name;
+						} 
+						html += '<option  index="' + e.district_id + '" ' + selected + '>' + e.district_name + '</option>';
+						districtList.push(e.district_id);
+					});
+					
+					$('#district').empty().append(html);
+					$('#district').change(onChangeDistrict)
+					$('.btn-filter').click(onChangeFilter);
+					getDistrictInformation();
 				}
-				console.log(JSON.stringify(arr));
-				html += '</div></div>';
-				html += '		<div class="col-8">';
-				html += '<div class="tab-content" id="nav-tabContent">';
-				html +=
-					'<div class="tab-pane fade show active" id="tab-content" role="tabpanel" aria-labelledby="list-home-list">Content to display</div>';
-				html += '</div></div>';
-				html += '</div>';
-				$('#view').empty().append(html);
-				$('.list-group-item').click(getDistrictInformation);
 			});
 		}
 
-		$(document).ready(function () {
-			const element = document.getElementById('date');
-			element.valueAsNumber = Date.now()-(new Date()).getTimezoneOffset()*60000;
-			
+		function onChangeFilter() {
+			$(this).toggleClass('btn-success');
+
+		}
+
+		function onDateChange() {
 			selectedDate = getDate();
-		
-			$('#date').change(function(){
-				selectedDate = getDate();
-				getDistrictInformation();
-			})
 			getDistrictInformation();
+		}
+
+		$(document).ready(function () {
+			getStateInformation(31);
+
+			const element = document.getElementById('date');
+			element.valueAsNumber = Date.now() - (new Date()).getTimezoneOffset() * 60000;
+			selectedDate = getDate();
+
+			$('#date').change(onDateChange);
 		})
 	</script>
 </body>

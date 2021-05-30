@@ -1,138 +1,540 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Speech Recognition</title>
-    <script>
-	var stopwords = [];
-      window.onload = () => {
-        const button = document.getElementById('button');
-        button.addEventListener('click', () => {
-          if (button.style['animation-name'] === 'flash') {
-            recognition.stop();
-            button.style['animation-name'] = 'none';
-            button.innerText = 'Press to Start';
-            content.innerText = '';
-          } else {
-            button.style['animation-name'] = 'flash';
-            button.innerText = 'Press to Stop';
-            recognition.start();
-          }
-        });
+    <title>Virtual Assistance</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+		integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
-        const content = document.getElementById('content');
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+		integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+		integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+		integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+		crossorigin="anonymous"></script>
+    <style>
+#center-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
 
-        const recognition = new webkitSpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.onresult = function (event) {
-          let result = '';
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            result += event.results[i][0].transcript;
-          }
-		  
-          content.innerText = result;
-		  result = process(result)
-          content.innerText = result;
-        };
-      };
-	  
+div#chat-circle > img {
+    width: 50px;
+    height: 50px;
+}
 
-function remove_stopwords(str) {
-    res = []
-    words = str.split(' ')
-    for(i=0;i<words.length;i++) {
-       word_clean = words[i].split(".").join("")
-       if(!stopwords.includes(word_clean)) {
-           res.push(word_clean)
-       }
+#chat-circle {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 9999999;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.btn#my-btn {
+    background: white;
+    padding-top: 13px;
+    padding-bottom: 12px;
+    border-radius: 45px;
+    padding-right: 40px;
+    padding-left: 40px;
+    color: #5865C3;
+}
+
+#chat-overlay {
+    background: rgba(255,255,255,0.1);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: none;
+}
+
+
+.chat-box {
+    position: fixed;
+    z-index: 9999999;
+    display: none;
+    background: #efefef;
+    right: 8px;
+    bottom: 8px;
+    width: 350px;
+    max-width: 85vw;
+    max-height: 100vh;
+    border-radius: 5px;
+    /*   box-shadow: 0px 5px 35px 9px #464a92; */
+    box-shadow: 0px 5px 35px 9px #ccc;
+}
+
+.chat-box-toggle {
+    float: right;
+    margin-right: 0;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.chat-box-header {
+    background: #054463;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    color: white;
+    text-align: left;
+    padding: 8px 10px;
+}
+
+.chat-box-body {
+    position: relative;
+    height: 370px;
+    height: auto;
+    border: 1px solid #ccc;
+    overflow: hidden;
+}
+
+    .chat-box-body:after {
+        content: "";
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAgOCkiIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCI+PGNpcmNsZSBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS4yNSIgY3g9IjE3NiIgY3k9IjEyIiByPSI0Ii8+PHBhdGggZD0iTTIwLjUuNWwyMyAxMW0tMjkgODRsLTMuNzkgMTAuMzc3TTI3LjAzNyAxMzEuNGw1Ljg5OCAyLjIwMy0zLjQ2IDUuOTQ3IDYuMDcyIDIuMzkyLTMuOTMzIDUuNzU4bTEyOC43MzMgMzUuMzdsLjY5My05LjMxNiAxMC4yOTIuMDUyLjQxNi05LjIyMiA5LjI3NC4zMzJNLjUgNDguNXM2LjEzMSA2LjQxMyA2Ljg0NyAxNC44MDVjLjcxNSA4LjM5My0yLjUyIDE0LjgwNi0yLjUyIDE0LjgwNk0xMjQuNTU1IDkwcy03LjQ0NCAwLTEzLjY3IDYuMTkyYy02LjIyNyA2LjE5Mi00LjgzOCAxMi4wMTItNC44MzggMTIuMDEybTIuMjQgNjguNjI2cy00LjAyNi05LjAyNS0xOC4xNDUtOS4wMjUtMTguMTQ1IDUuNy0xOC4xNDUgNS43IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS4yNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTg1LjcxNiAzNi4xNDZsNS4yNDMtOS41MjFoMTEuMDkzbDUuNDE2IDkuNTIxLTUuNDEgOS4xODVIOTAuOTUzbC01LjIzNy05LjE4NXptNjMuOTA5IDE1LjQ3OWgxMC43NXYxMC43NWgtMTAuNzV6IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS4yNSIvPjxjaXJjbGUgZmlsbD0iIzAwMCIgY3g9IjcxLjUiIGN5PSI3LjUiIHI9IjEuNSIvPjxjaXJjbGUgZmlsbD0iIzAwMCIgY3g9IjE3MC41IiBjeT0iOTUuNSIgcj0iMS41Ii8+PGNpcmNsZSBmaWxsPSIjMDAwIiBjeD0iODEuNSIgY3k9IjEzNC41IiByPSIxLjUiLz48Y2lyY2xlIGZpbGw9IiMwMDAiIGN4PSIxMy41IiBjeT0iMjMuNSIgcj0iMS41Ii8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTkzIDcxaDN2M2gtM3ptMzMgODRoM3YzaC0zem0tODUgMThoM3YzaC0zeiIvPjxwYXRoIGQ9Ik0zOS4zODQgNTEuMTIybDUuNzU4LTQuNDU0IDYuNDUzIDQuMjA1LTIuMjk0IDcuMzYzaC03Ljc5bC0yLjEyNy03LjExNHpNMTMwLjE5NSA0LjAzbDEzLjgzIDUuMDYyLTEwLjA5IDcuMDQ4LTMuNzQtMTIuMTF6bS04MyA5NWwxNC44MyA1LjQyOS0xMC44MiA3LjU1Ny00LjAxLTEyLjk4N3pNNS4yMTMgMTYxLjQ5NWwxMS4zMjggMjAuODk3TDIuMjY1IDE4MGwyLjk0OC0xOC41MDV6IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS4yNSIvPjxwYXRoIGQ9Ik0xNDkuMDUgMTI3LjQ2OHMtLjUxIDIuMTgzLjk5NSAzLjM2NmMxLjU2IDEuMjI2IDguNjQyLTEuODk1IDMuOTY3LTcuNzg1LTIuMzY3LTIuNDc3LTYuNS0zLjIyNi05LjMzIDAtNS4yMDggNS45MzYgMCAxNy41MSAxMS42MSAxMy43MyAxMi40NTgtNi4yNTcgNS42MzMtMjEuNjU2LTUuMDczLTIyLjY1NC02LjYwMi0uNjA2LTE0LjA0MyAxLjc1Ni0xNi4xNTcgMTAuMjY4LTEuNzE4IDYuOTIgMS41ODQgMTcuMzg3IDEyLjQ1IDIwLjQ3NiAxMC44NjYgMy4wOSAxOS4zMzEtNC4zMSAxOS4zMzEtNC4zMSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEuMjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvZz48L3N2Zz4=');
+        opacity: 0.1;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        height: 100%;
+        position: absolute;
+        z-index: -1;
     }
-    return(res.join(' '))
-} 
-function process(rawText) {
-    let text = rawText; //.replace(/\s/g, "");
-    text = text.toLowerCase();
-    let response = null;
-    //stopWords = {'her', 'during', 'among', 'thereafter', 'only', 'hers', 'in', 'none', 'with', 'un', 'put', 'hence', 'each', 'would', 'have', 'to', 'itself', 'that', 'seeming', 'hereupon', 'someone', 'eight', 'she', 'forty', 'much', 'throughout', 'less', 'was', 'interest', 'elsewhere', 'already', 'whatever', 'or', 'seem', 'fire', 'however', 'keep', 'detail', 'both', 'yourselves', 'indeed', 'enough', 'too', 'us', 'wherein', 'himself', 'behind', 'everything', 'part', 'made', 'thereupon', 'for', 'nor', 'before', 'front', 'sincere', 'really', 'than', 'alone', 'doing', 'amongst', 'across', 'him', 'another', 'some', 'whoever', 'four', 'other', 'latterly', 'off', 'sometime', 'above', 'often', 'herein', 'am', 'whereby', 'although', 'who', 'should', 'amount', 'anyway', 'else', 'upon', 'this', 'when', 'we', 'few', 'anywhere', 'will', 'though', 'being', 'fill', 'used', 'full', 'thru', 'call', 'whereafter', 'various', 'has', 'same', 'former', 'whereas', 'what', 'had', 'mostly', 'onto', 'go', 'could', 'yourself', 'meanwhile', 'beyond', 'beside', 'ours', 'side', 'our', 'five', 'nobody', 'herself', 'is', 'ever', 'they', 'here', 'eleven', 'fifty', 'therefore', 'nothing', 'not', 'mill', 'without', 'whence', 'get', 'whither', 'then', 'no', 'own', 'many', 'anything', 'etc', 'make', 'from', 'against', 'ltd', 'next', 'afterwards', 'unless', 'while', 'thin', 'beforehand', 'by', 'amoungst', 'you', 'third', 'as', 'those', 'done', 'becoming', 'say', 'either', 'doesn', 'twenty', 'his', 'yet', 'latter', 'somehow', 'are', 'these', 'mine', 'under', 'take', 'whose', 'others', 'over', 'perhaps', 'thence', 'does', 'where', 'two', 'always', 'your', 'wherever', 'became', 'which', 'about', 'but', 'towards', 'still', 'rather', 'quite', 'whether', 'somewhere', 'might', 'do', 'bottom', 'until', 'km', 'yours', 'serious', 'find', 'please', 'hasnt', 'otherwise', 'six', 'toward', 'sometimes', 'of', 'fifteen', 'eg', 'just', 'a', 'me', 'describe', 'why', 'an', 'and', 'may', 'within', 'kg', 'con', 're', 'nevertheless', 'through', 'very', 'anyhow', 'down', 'nowhere', 'now', 'it', 'cant', 'de', 'move', 'hereby', 'how', 'found', 'whom', 'were', 'together', 'again', 'moreover', 'first', 'never', 'below', 'between', 'computer', 'ten', 'into', 'see', 'everywhere', 'there', 'neither', 'every', 'couldnt', 'up', 'several', 'the', 'i', 'becomes', 'don', 'ie', 'been', 'whereupon', 'seemed', 'most', 'noone', 'whole', 'must', 'cannot', 'per', 'my', 'thereby', 'so', 'he', 'name', 'co', 'its', 'everyone', 'if', 'become', 'thick', 'thus', 'regarding', 'didn', 'give', 'all', 'show', 'any', 'using', 'on', 'further', 'around', 'back', 'least', 'since', 'anyone', 'once', 'can', 'bill', 'hereafter', 'be', 'seems', 'their', 'myself', 'nine', 'also', 'system', 'at', 'more', 'out', 'twelve', 'therein', 'almost', 'except', 'last', 'did', 'something', 'besides', 'via', 'whenever', 'formerly', 'cry', 'one', 'hundred', 'sixty', 'after', 'well', 'them', 'namely', 'empty', 'three', 'even', 'along', 'because', 'ourselves', 'such', 'top', 'due', 'inc', 'themselves'};
-    stopwords = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now'];
 
-    text = remove_stopwords(text);
-    arr = [{
-        "Key": "Help",
-        "Value": "Say something else to search",
-        "Keyword": ["Help"]
-    }, {
+#chat-input {
+    background: #f4f7f9;
+    width: 100%;
+    position: relative;
+    height: 47px;
+    padding-top: 10px;
+    padding-right: 50px;
+    padding-bottom: 10px;
+    padding-left: 15px;
+    border: none;
+    resize: none;
+    outline: none;
+    border: 1px solid #ccc;
+    color: #888;
+    border-top: none;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    overflow: hidden;
+}
+
+.chat-input > form {
+    margin-bottom: 0;
+}
+
+#chat-input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+    color: #ccc;
+}
+
+#chat-input::-moz-placeholder { /* Firefox 19+ */
+    color: #ccc;
+}
+
+#chat-input:-ms-input-placeholder { /* IE 10+ */
+    color: #ccc;
+}
+
+#chat-input:-moz-placeholder { /* Firefox 18- */
+    color: #ccc;
+}
+
+.chat-submit {
+    position: absolute;
+    bottom: 3px;
+    right: 10px;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    border-radius: 50%;
+    color: #5A5EB9;
+    width: 35px;
+    height: 35px;
+}
+
+.chat-logs {
+    padding: 15px;
+    height: 370px;
+    overflow-y: scroll;
+}
+
+    .chat-logs::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+        background-color: #F5F5F5;
+    }
+
+    .chat-logs::-webkit-scrollbar {
+        width: 5px;
+        background-color: #F5F5F5;
+    }
+
+    .chat-logs::-webkit-scrollbar-thumb {
+        background-color: #5A5EB9;
+    }
+
+
+
+@media only screen and (max-width: 500px) {
+    .chat-logs {
+        height: 40vh;
+    }
+}
+
+.chat-msg.user > .msg-avatar img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    float: left;
+    width: 15%;
+}
+
+.chat-msg.self > .msg-avatar img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    float: right;
+    width: 15%;
+}
+
+.cm-msg-text {
+    background: white;
+    padding: 4px 8px 4px 8px;
+    color: #666;
+    max-width: 75%;
+    float: left;
+    margin-left: 10px;
+    position: relative;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.chat-msg {
+    clear: both;
+}
+
+    .chat-msg.self > .cm-msg-text {
+        float: right;
+        margin-right: 5px;
+        background: #1dc7de;
+        color: white;
+    }
+
+.cm-msg-button > ul > li {
+    list-style: none;
+    float: left;
+    width: 50%;
+}
+
+.cm-msg-button {
+    clear: both;
+    margin-bottom: 70px;
+}
+
+.chat-box {
+    position: fixed;
+    z-index: 9999999;
+}
+
+.chat-msg.self > .msg-avatar .msg-user {
+    float: right;
+    font-weight: bold;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 50%;
+    font-size: 13px;
+    color: #054463;
+    text-align: center;
+    background: #ccc;
+}
+.chat-msg.user > .msg-avatar .msg-user {
+    float: left;
+    font-weight: bold;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 50%;
+    font-size: 13px;
+    color: #054463;
+    text-align: center;
+    background: #ccc;
+}
+    </style>
+ 
+   
+</head>
+
+<body>
+    <button id="button">Press to Start</button>
+    <div id="LoggedInUserFirstName" class="hide">MN</div>
+    <div class="VirtualAssistant">
+        <div id="chat-circle" class="btn btn-raised">
+            <img src="VR.png">
+        </div>
+        <div class="chat-box">
+            <div class="chat-box-header">
+                Virtual Assistant
+      <span class="chat-box-toggle"><i class="fa fa-close"></i></span>
+            </div>
+            <div class="chat-box-body">
+                <div class="chat-box-overlay">
+                </div>
+                <div class="chat-logs">
+                </div>
+                <!--chat-log -->
+            </div>
+            <div class="chat-input">
+                <form>
+                    <input type="text" id="chat-input" placeholder="Send a Query..." />
+                    <div class="chat-submit" id="chat-submit" style="cursor: pointer;"><i class="fa fa-microphone" style="font-size: 20px;"></i></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        var stopwords = [];
+        var model = {};
+        model.ResponseData = [{
+            "Key": "Help",
+            "Value": "Say something else to search",
+            "Keyword": ["Help"]
+        }, {
             "Key": "Create Application",
             "Value": "Goto Rims menu and click application then click new application icon",
             "Keyword": ["Create", "Application"]
         },
-    {
-        "Key": "Create Correspondance",
-        "Value": "Goto Rims menu and click All Correspondance then click new Correspondance icon",
-        "Keyword": ["Create", "Correspondance"]
+        {
+            "Key": "Create Correspondance",
+            "Value": "Goto Rims menu and click All Correspondance then click new Correspondance icon",
+            "Keyword": ["Create", "Correspondance"]
+        },
+        {
+            "Key": "Create Product",
+            "Value": "Goto Admin menu and click Product then click new Product icon",
+            "Keyword": ["Create", "Product"]
+        }
+        ];
+
+        var INDEX = 0;
+
+$("#chat-circle").click(function () {
+    $("#chat-circle").toggle('scale');
+    $(".chat-box").toggle('scale');
+})
+
+$(".chat-box-toggle").click(function () {
+    $("#chat-circle").toggle('scale');
+    $(".chat-box").toggle('scale');
+})
+
+$("#chat-submit1").click(function (e) {
+    
+    if (jQuery.inArray('fa-microphone-slash1', e.target.classList) == -1) {
+        recognition.start()
+    }
+    else {
+        recognition.stop()
+    }
+    $('.fa-microphone').toggleClass('fa-microphone-slash');
+    $('#chat-input').attr('placeholder', 'Start Speaking...')
+    e.preventDefault();
+    return;
+    var msg = $("#chat-input").val();
+    if (msg.trim() == '') {
+        return false;
+    }
+    generate_message(msg, 'self');
+    var buttons = [{
+        name: 'Existing User',
+        value: 'existing'
     },
     {
-        "Key": "Create Product",
-        "Value": "Goto Admin menu and click Product then click new Product icon",
-        "Keyword": ["Create", "Product"]
+        name: 'New User',
+        value: 'new'
     }
     ];
-    var textSplit = text.split(' ');
-    var scoreList = [];
-    arr.forEach(function (e, ind) {
-        var score = 0;
-        for (var i = 0; i < textSplit.length; i++) {
-            e.Keyword.forEach(function (el) {
-                if (el.toLowerCase() == textSplit[i]) {
-                    score++;
-                }
-            })
-        }
-        var obj = {
-            'index': ind,
-            'score': score
-        };
-        scoreList.push(obj);
-    })
-    console.log(scoreList);
+    setTimeout(function () {
+        generate_message(msg, 'user');
+    }, 1000)
 
-    var max = 0;
-    var _index = 0;
-    scoreList.forEach(function (obj) {
-        if (obj.score > max) {
-            max = obj.score;
-            _index = obj.index;
-        }
-    });
-    response = arr[_index].Value;
-    /*
-    switch(text) {
-    	case "hello":
-    		response = "hi, how are you doing?"; break;
-    	case "what'syourname":
-    		response = "My name's Siri.";  break;
-    	case "howareyou":
-    		response = "I'm good."; break;
-    	case "whattimeisit":
-    		response = new Date().toLocaleTimeString(); break;
-    	case "stop":
-    		response = "Bye!!";
-    		toggleBtn();
+})
+
+function generate_message(msg, type) {
+    INDEX++;
+    var str = "";
+    str += "<div id='cm-msg-" + INDEX + "' class=\"chat-msg " + type + "\">";
+    str += "          <span class=\"msg-avatar\">";
+    var _user = type == 'self' ? $('#LoggedInUserFirstName').html() : 'VA';
+    str += '<span class="msg-user">'+_user+'</span>';
+    str += "          <\/span>";
+    str += "          <div class=\"cm-msg-text\">";
+    str += msg;
+    str += "          <\/div>";
+    str += "        <\/div>";
+    $(".chat-logs").append(str);
+    $("#cm-msg-" + INDEX).hide().fadeIn(300);
+    if (type == 'self') {
+        $("#chat-input").val('');
     }
-    */
-    if (!response) {
-        return `I found some information for ${rawText}`;
-    }
-    return response;
+    $(".chat-logs").stop().animate({
+        scrollTop: $(".chat-logs")[0].scrollHeight
+    }, 1000);
 }
+
+function generate_button_message(msg, buttons) {
+    return;
+    /* Buttons should be object array 
+      [
+        {
+          name: 'Existing User',
+          value: 'existing'
+        },
+        {
+          name: 'New User',
+          value: 'new'
+        }
+      ]
+    */
+    INDEX++;
+    var btn_obj = buttons.map(function (button) {
+        return "              <li class=\"button\"><a href=\"javascript:;\" class=\"btn btn-primary chat-btn\" chat-value=\"" + button.value + "\">" + button.name + "<\/a><\/li>";
+    }).join('');
+    var str = "";
+    str += "<div id='cm-msg-" + INDEX + "' class=\"chat-msg user\">";
+    str += "          <span class=\"msg-avatar\">";
+    str += '<span class="msg-user">MN</span>';
+    str += "          <\/span>";
+    str += "          <div class=\"cm-msg-text\">";
+    str += msg;
+    str += "          <\/div>";
+    str += "          <div class=\"cm-msg-button\">";
+    str += "            <ul>";
+    str += btn_obj;
+    str += "            <\/ul>";
+    str += "          <\/div>";
+    str += "        <\/div>";
+    $(".chat-logs").append(str);
+    $("#cm-msg-" + INDEX).hide().fadeIn(300);
+    $(".chat-logs").stop().animate({
+        scrollTop: $(".chat-logs")[0].scrollHeight
+    }, 1000);
+    $("#chat-input").attr("disabled", true);
+}
+
+$(document).delegate(".chat-btn", "click", function () {
+    var value = $(this).attr("chat-value");
+    var name = $(this).html();
+    $("#chat-input").attr("disabled", false);
+    generate_message(name, 'self');
+})
+
+var startBtn = $("#chat-submit")[0];
+
+
+        $(document).ready(function(){           debugger;
+            startBtn.addEventListener('click', () => {
+                if (button.style['animation-name'] === 'flash') {
+                    recognition.stop();
+                    button.style['animation-name'] = 'none';
+                    button.innerText = 'Press to Start';
+                    content.innerText = '';
+                } else {
+                    button.style['animation-name'] = 'flash';
+                    button.innerText = 'Press to Stop';
+                    recognition.start();
+                }
+            });
+
+            const content = document.getElementById('content');
+
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.onresult = function (event) {
+                let result = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    result += event.results[i][0].transcript;
+                }
+
+                generate_message(result, 'self');
+                result = process(result)
+                generate_message(result, 'user');
+            };
+        })
+
+
+
+        function remove_stopwords(str) {
+            res = []
+            words = str.split(' ')
+            for (i = 0; i < words.length; i++) {
+                word_clean = words[i].split(".").join("")
+                if (!stopwords.includes(word_clean)) {
+                    res.push(word_clean)
+                }
+            }
+            return (res.join(' '))
+        }
+        function process(rawText) {
+            let text = rawText; //.replace(/\s/g, "");
+            text = text.toLowerCase();
+            let response = null;
+            //stopWords = {'her', 'during', 'among', 'thereafter', 'only', 'hers', 'in', 'none', 'with', 'un', 'put', 'hence', 'each', 'would', 'have', 'to', 'itself', 'that', 'seeming', 'hereupon', 'someone', 'eight', 'she', 'forty', 'much', 'throughout', 'less', 'was', 'interest', 'elsewhere', 'already', 'whatever', 'or', 'seem', 'fire', 'however', 'keep', 'detail', 'both', 'yourselves', 'indeed', 'enough', 'too', 'us', 'wherein', 'himself', 'behind', 'everything', 'part', 'made', 'thereupon', 'for', 'nor', 'before', 'front', 'sincere', 'really', 'than', 'alone', 'doing', 'amongst', 'across', 'him', 'another', 'some', 'whoever', 'four', 'other', 'latterly', 'off', 'sometime', 'above', 'often', 'herein', 'am', 'whereby', 'although', 'who', 'should', 'amount', 'anyway', 'else', 'upon', 'this', 'when', 'we', 'few', 'anywhere', 'will', 'though', 'being', 'fill', 'used', 'full', 'thru', 'call', 'whereafter', 'various', 'has', 'same', 'former', 'whereas', 'what', 'had', 'mostly', 'onto', 'go', 'could', 'yourself', 'meanwhile', 'beyond', 'beside', 'ours', 'side', 'our', 'five', 'nobody', 'herself', 'is', 'ever', 'they', 'here', 'eleven', 'fifty', 'therefore', 'nothing', 'not', 'mill', 'without', 'whence', 'get', 'whither', 'then', 'no', 'own', 'many', 'anything', 'etc', 'make', 'from', 'against', 'ltd', 'next', 'afterwards', 'unless', 'while', 'thin', 'beforehand', 'by', 'amoungst', 'you', 'third', 'as', 'those', 'done', 'becoming', 'say', 'either', 'doesn', 'twenty', 'his', 'yet', 'latter', 'somehow', 'are', 'these', 'mine', 'under', 'take', 'whose', 'others', 'over', 'perhaps', 'thence', 'does', 'where', 'two', 'always', 'your', 'wherever', 'became', 'which', 'about', 'but', 'towards', 'still', 'rather', 'quite', 'whether', 'somewhere', 'might', 'do', 'bottom', 'until', 'km', 'yours', 'serious', 'find', 'please', 'hasnt', 'otherwise', 'six', 'toward', 'sometimes', 'of', 'fifteen', 'eg', 'just', 'a', 'me', 'describe', 'why', 'an', 'and', 'may', 'within', 'kg', 'con', 're', 'nevertheless', 'through', 'very', 'anyhow', 'down', 'nowhere', 'now', 'it', 'cant', 'de', 'move', 'hereby', 'how', 'found', 'whom', 'were', 'together', 'again', 'moreover', 'first', 'never', 'below', 'between', 'computer', 'ten', 'into', 'see', 'everywhere', 'there', 'neither', 'every', 'couldnt', 'up', 'several', 'the', 'i', 'becomes', 'don', 'ie', 'been', 'whereupon', 'seemed', 'most', 'noone', 'whole', 'must', 'cannot', 'per', 'my', 'thereby', 'so', 'he', 'name', 'co', 'its', 'everyone', 'if', 'become', 'thick', 'thus', 'regarding', 'didn', 'give', 'all', 'show', 'any', 'using', 'on', 'further', 'around', 'back', 'least', 'since', 'anyone', 'once', 'can', 'bill', 'hereafter', 'be', 'seems', 'their', 'myself', 'nine', 'also', 'system', 'at', 'more', 'out', 'twelve', 'therein', 'almost', 'except', 'last', 'did', 'something', 'besides', 'via', 'whenever', 'formerly', 'cry', 'one', 'hundred', 'sixty', 'after', 'well', 'them', 'namely', 'empty', 'three', 'even', 'along', 'because', 'ourselves', 'such', 'top', 'due', 'inc', 'themselves'};
+            stopwords = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now'];
+
+            text = remove_stopwords(text);
+
+            var textSplit = text.split(' ');
+            var scoreList = [];
+            model.ResponseData.forEach(function (e, ind) {
+                var score = 0;
+                for (var i = 0; i < textSplit.length; i++) {
+                    e.Keyword.forEach(function (el) {
+                        if (el.toLowerCase() == textSplit[i]) {
+                            score++;
+                        }
+                    })
+                }
+                var obj = {
+                    'index': ind,
+                    'score': score
+                };
+                scoreList.push(obj);
+            })
+            console.log(scoreList);
+
+            var max = 0;
+            var _index = 0;
+            scoreList.forEach(function (obj) {
+                if (obj.score > max) {
+                    max = obj.score;
+                    _index = obj.index;
+                }
+            });
+            response = model.ResponseData[_index].Value;
+
+            if (!response) {
+                return `I found some information for ${rawText}`;
+            }
+            return response;
+        }
     </script>
-    <style>
-      
-    </style>
-  </head>
-  <body>
-    <button id="button">Press to Start</button>
-    <div id="content"></div>
-  </body>
+</body>
+
 </html>

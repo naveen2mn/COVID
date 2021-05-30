@@ -286,7 +286,6 @@
 </head>
 
 <body>
-    <button id="button">Press to Start</button>
     <div id="LoggedInUserFirstName" class="hide">MN</div>
     <div class="VirtualAssistant">
         <div id="chat-circle" class="btn btn-raised">
@@ -482,8 +481,8 @@
                     $('#chat-input').val(result);
                     setTimeout(function () {
                         generate_message(result, 'self');
-                        result = process(result)
-                        generate_message(result, 'user');
+                        var response = process(result)
+                        generate_message(response, 'user');
                     }, 3000);
                 }
             }

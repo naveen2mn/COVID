@@ -19,8 +19,8 @@
 	<style>
 		.list-group-item {
 			padding: 2px 4px;
-    height: 50px;
-    margin-bottom: 4px;
+			height: 50px;
+			margin-bottom: 4px;
 		}
 
 		#list-tab {
@@ -54,10 +54,10 @@
 
 		.dosage {
 			background: white;
-    display: flex;
-    float: right;
-    box-shadow: 2px 2px 2px 0 #ccc;
-    border: 1px solid #00685e;
+			display: flex;
+			float: right;
+			box-shadow: 2px 2px 2px 0 #ccc;
+			border: 1px solid #00685e;
 		}
 
 		.d1 {
@@ -67,9 +67,9 @@
 
 		.dosage span {
 			background: #009688;
-    padding: 0 5px;
-    float: left;
-    color: white;
+			padding: 0 5px;
+			float: left;
+			color: white;
 		}
 
 		.d2 {
@@ -93,16 +93,16 @@
 		</div>
 		<div class="row">
 			<div class="col-xs-12" style=" display: flex; justify-content: space-around; margin: 10px 0; ">
-				<div class="btn btn-xs btn-filter btn-default btn-success">18+</div>
-				<div class="btn btn-xs btn-filter btn-default">45+</div>
-				<div class="btn btn-xs btn-filter btn-default">Free</div>
-				<div class="btn btn-xs btn-filter btn-default">Paid</div>
-				<div class="btn btn-xs btn-filter btn-default">Covaxin</div>
-				<div class="btn btn-xs btn-filter btn-default">Covishield</div>
+				<div class="btn btn-xs btn-filter btn-default" type="age">18+</div>
+				<div class="btn btn-xs btn-filter btn-default" type="age">45+</div>
+				<div class="btn btn-xs btn-filter btn-default" type="fee">Free</div>
+				<div class="btn btn-xs btn-filter btn-default" type="fee">Paid</div>
+				<div class="btn btn-xs btn-filter btn-default" type="vaccine">Covaxin</div>
+				<div class="btn btn-xs btn-filter btn-default" type="vaccine">Covishield</div>
 			</div>
 		</div>
 		<div id="view">
-			<span class="glyphicon glyphicon-refresh gly-ani" style="font-size:40px;"></span>
+			
 		</div>
 	</div>
 
@@ -126,6 +126,7 @@
 		const Tomorrow = new Date(Today)
 		Tomorrow.setDate(Tomorrow.getDate() + 1)
 		var districtList = [];
+		var fiterArray=[{age:[],fee:[],vaccine:[]}];
 
 		function getDate(date) {
 			var date = $('#date').val();
@@ -172,26 +173,26 @@
 				html += '<ul class="list-group">';
 				centers.forEach(function (e, i) {
 					if (selectedDistrict == e.district_name) {
-					html += '<li class="list-group-item" title="' + e.address + '-' + e.pincode + '">';
-						var color = e.fee_type == 'Paid'? 'btn-danger':'btn-success';
-						html += '<div>' + e.name ;
-							html += '<span class="pull-right badge '+color+'">'+e.fee_type.charAt(0)+'</span>';
-							html +=  '</div>';
-					html += '<div class="pull-left">';
-						
-					color = e.min_age_limit == '18'? 'btn-success':'btn-warning';
-					html += '<span class="badge '+color+'">' + e.min_age_limit + '+</span>';
-					color = e.vaccine == 'COVAXIN'? 'btn-danger': 'btn-info';
-					html += '<span class="badge '+color+'">' + e.vaccine + '</span>';
-					html += '</div>';
-					html += '<div class="dosage">';
-					html += '<div class="d1"><span>D1</span>' + e.available_capacity_dose1 + '</div>';
-					html += '<div class="d2"><span>D1</span>' + e.available_capacity_dose2 + '</div>';
-					html += '<div class="total"><span>Total</span>' + e.available_capacity + '</div>';
-					html += '</div>';
+						//e = onFilter(e);
+						html += '<li class="list-group-item" title="' + e.address + '-' + e.pincode + '">';
+						var color = e.fee_type == 'Paid' ? 'btn-danger' : 'btn-success';
+						html += '<div>' + e.name;
+						html += '<span class="pull-right badge ' + color + '">' + e.fee_type.charAt(0) + '</span>';
+						html += '</div>';
+						html += '<div class="pull-left">';
 
-					html += '</li>';
+						color = e.min_age_limit == '18' ? 'btn-success' : 'btn-warning';
+						html += '<span class="badge ' + color + '">' + e.min_age_limit + '+</span>';
+						color = e.vaccine == 'COVAXIN' ? 'btn-danger' : 'btn-info';
+						html += '<span class="badge ' + color + '">' + e.vaccine + '</span>';
+						html += '</div>';
+						html += '<div class="dosage">';
+						html += '<div class="d1"><span>D1</span>' + e.available_capacity_dose1 + '</div>';
+						html += '<div class="d2"><span>D1</span>' + e.available_capacity_dose2 + '</div>';
+						html += '<div class="total"><span>Total</span>' + e.available_capacity + '</div>';
+						html += '</div>';
 
+						html += '</li>';
 					}
 				})
 				html += '</ul>';
@@ -204,7 +205,14 @@
 
 		}
 
+		function onFilter(data){
+			
+		}
+
+
 		function getDistrictInformation() {
+			$('#view').empty().append('<span class="glyphicon glyphicon-refresh gly-ani" style="font-size:40px;"></span>');
+			centers =[];
 			selectedDate = getDate(new Date());
 
 			districtList.forEach(function (e, ind) {
@@ -231,11 +239,11 @@
 			})
 
 		}
-function onChangeDistrict(e){
-	selectedDistrict = e.target.options[e.target.selectedIndex].innerText;
-	render();
-    
-}
+		function onChangeDistrict(e) {
+			selectedDistrict = e.target.options[e.target.selectedIndex].innerText;
+			render();
+
+		}
 		function getStateInformation(stateId) {
 			$.getJSON("https://cdn-api.co-vin.in/api/v2/admin/location/districts/" + stateId, function (data) {
 				var districts = data.districts || [];
@@ -243,14 +251,14 @@ function onChangeDistrict(e){
 				if (districts.length > 0) {
 					districts.forEach(function (e, i) {
 						var selected = '';
-						if(e.district_id == 560){
-							selected ='selected';
+						if (e.district_id == 560) {
+							selected = 'selected';
 							selectedDistrict = e.district_name;
-						} 
+						}
 						html += '<option  index="' + e.district_id + '" ' + selected + '>' + e.district_name + '</option>';
 						districtList.push(e.district_id);
 					});
-					
+
 					$('#district').empty().append(html);
 					$('#district').change(onChangeDistrict)
 					$('.btn-filter').click(onChangeFilter);
@@ -261,7 +269,15 @@ function onChangeDistrict(e){
 
 		function onChangeFilter() {
 			$(this).toggleClass('btn-success');
-
+			var type = this.getAttribute('type');
+			var item = this.innerText.replace('+', '');
+			var index = fiterArray[type].indexOf(item);
+			if (index !== -1) {
+				fiterArray[type].splice(index, 1);
+			}else{
+				fiterArray[type].push(item)
+			}
+render();
 		}
 
 		function onDateChange() {

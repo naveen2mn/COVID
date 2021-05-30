@@ -472,9 +472,12 @@ var startBtn = $("#chat-submit")[0];
                 const res = event.results[last];
                 const text = res[0].transcript;
                 if (res.isFinal) {
+                    $('#chat-input').html(result);
+                    setTimeout(function(){
                     generate_message(result, 'self');
                     result = process(result)
                     generate_message(result, 'user');
+                },1000)
                 }
             }
             /*

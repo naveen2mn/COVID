@@ -466,6 +466,18 @@ var startBtn = $("#chat-submit")[0];
             const recognition = new webkitSpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
+
+            recognition.onresult = event => {
+                const last = event.results.length - 1;
+                const res = event.results[last];
+                const text = res[0].transcript;
+                if (res.isFinal) {
+                    generate_message(result, 'self');
+                    result = process(result)
+                    generate_message(result, 'user');
+                }
+            }
+            /*
             recognition.onresult = function (event) {
                 let result = '';
                 for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -476,6 +488,7 @@ var startBtn = $("#chat-submit")[0];
                 result = process(result)
                 generate_message(result, 'user');
             };
+            */
         })
 
 

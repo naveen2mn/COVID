@@ -504,6 +504,7 @@
 
             let listening = false;
             toggleBtn = function() {
+                $('.fa-microphone').toggleClass('fa-microphone-slash');
                 if (listening) {
                     recognition.stop();
                 } else {

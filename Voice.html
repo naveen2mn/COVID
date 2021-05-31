@@ -480,6 +480,7 @@
                 const last = event.results.length - 1;
                 const res = event.results[last];
                 const result = res[0].transcript;
+                $('#chat-input').val(result);
                 if (res.isFinal) {
                     $('#chat-input').val(result);
                     setTimeout(function () {

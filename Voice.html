@@ -437,6 +437,9 @@
 
 
         $(document).ready(function () {
+            $.getJSON('data.json', function (data) {
+                model.ResponseData = data
+            })
 
 
             const content = document.getElementById('content');
@@ -532,47 +535,39 @@
 
             var textSplit = text.split(' ');
             var scoreList = [];
-            $.ajax({
-                type: 'GET',
-                url: 'data.json',
-                dataType: 'json',
-                async: false,
-                success: function (data) {
-                    result = data;
-                    model.ResponseData = data;
-                    model.ResponseData.forEach(function (e, ind) {
-                        var score = 0;
-                        for (var i = 0; i < textSplit.length; i++) {
-                            e.Keyword.forEach(function (el) {
-                                if (el.toLowerCase() == textSplit[i]) {
-                                    score++;
-                                }
-                            })
+            model.ResponseData.forEach(function (e, ind) {
+                var score = 0;
+                for (var i = 0; i < textSplit.length; i++) {
+                    e.Keyword.forEach(function (el) {
+                        if (el.toLowerCase() == textSplit[i]) {
+                            score++;
                         }
-                        var obj = {
-                            'index': ind,
-                            'score': score
-                        };
-                        scoreList.push(obj);
                     })
-                    console.log(scoreList);
-
-                    var max = 0;
-                    var _index = 0;
-                    scoreList.forEach(function (obj) {
-                        if (obj.score > max) {
-                            max = obj.score;
-                            _index = obj.index;
-                        }
-                    });
-                    response = model.ResponseData[_index].Value;
-
-                    if (!response) {
-                        return `I found some information for ${rawText}`;
-                    }
-                    
                 }
+                var obj = {
+                    'index': ind,
+                    'score': score
+                };
+                scoreList.push(obj);
             })
+            console.log(scoreList);
+
+            var max = 0;
+            var _index = 0;
+            scoreList.forEach(function (obj) {
+                if (obj.score > max) {
+                    max = obj.score;
+                    _index = obj.index;
+                }
+            });
+            response = model.ResponseData[_index].Value;
+
+            if (!response) {
+                return `I found some information for ${rawText}`;
+            }
+
+
+
             return response;
         }
     </script>

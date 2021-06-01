@@ -1,0 +1,32 @@
+[{
+    "Key": "Help",
+    "Value": "Say something else to search",
+    "Keyword": ["Help"]
+},{
+    "Key": "Help",
+    "Value": "Say something else to search",
+    "Keyword": ["Help"]
+}, {
+    "Key": "Hello",
+    "Value": "Hi, How can I help you?",
+    "Keyword": ["Hi", "Hello","Hey"]
+}, {
+    "Key": "Good Morning",
+    "Value": "Hi, Good Morning?",
+    "Keyword": ["Good Morning"]
+},{
+    "Key": "Create Application",
+    "Value": "Goto Rims menu and click application then click new application icon",
+    "Keyword": ["Create", "Application"]
+},
+{
+    "Key": "Create Correspondance",
+    "Value": "Goto Rims menu and click All Correspondance then click new Correspondance icon",
+    "Keyword": ["Create", "Correspondance"]
+},
+{
+    "Key": "Create Product",
+    "Value": "Goto Admin menu and click Product then click new Product icon",
+    "Keyword": ["Create", "Product"]
+}
+]

@@ -317,38 +317,7 @@
     <script>
         var stopwords = [];
         var model = {};
-        model.ResponseData = [{
-            "Key": "Help",
-            "Value": "Say something else to search",
-            "Keyword": ["Help"]
-        },{
-            "Key": "Help",
-            "Value": "Say something else to search",
-            "Keyword": ["Help"]
-        }, {
-            "Key": "Hello",
-            "Value": "Hi, How can I help you?",
-            "Keyword": ["Hi", "Hello","Hey"]
-        }, {
-            "Key": "Good Morning",
-            "Value": "Hi, Good Morning?",
-            "Keyword": ["Good Morning"]
-        },{
-            "Key": "Create Application",
-            "Value": "Goto Rims menu and click application then click new application icon",
-            "Keyword": ["Create", "Application"]
-        },
-        {
-            "Key": "Create Correspondance",
-            "Value": "Goto Rims menu and click All Correspondance then click new Correspondance icon",
-            "Keyword": ["Create", "Correspondance"]
-        },
-        {
-            "Key": "Create Product",
-            "Value": "Goto Admin menu and click Product then click new Product icon",
-            "Keyword": ["Create", "Product"]
-        }
-        ];
+        model.ResponseData = [];
 
         var INDEX = 0;
 
@@ -468,7 +437,7 @@
 
 
         $(document).ready(function () {
-           
+
 
             const content = document.getElementById('content');
 
@@ -504,7 +473,7 @@
             */
 
             let listening = false;
-            toggleBtn = function() {
+            toggleBtn = function () {
                 $('.fa-microphone').toggleClass('fa-microphone-slash');
                 if (listening) {
                     recognition.stop();
@@ -514,17 +483,17 @@
                 listening = !listening;
             };
             startBtn.addEventListener("click", toggleBtn);
-/*
-            let listening = false;
-            startBtn.addEventListener('click', () => {
-                if (listening) {
-                    recognition.stop();
-
-                } else {
-                    recognition.start();
-                }
-                listening = !listening;
-            });*/
+            /*
+                        let listening = false;
+                        startBtn.addEventListener('click', () => {
+                            if (listening) {
+                                recognition.stop();
+            
+                            } else {
+                                recognition.start();
+                            }
+                            listening = !listening;
+                        });*/
         })
 
 
@@ -551,37 +520,40 @@
 
             var textSplit = text.split(' ');
             var scoreList = [];
-            model.ResponseData.forEach(function (e, ind) {
-                var score = 0;
-                for (var i = 0; i < textSplit.length; i++) {
-                    e.Keyword.forEach(function (el) {
-                        if (el.toLowerCase() == textSplit[i]) {
-                            score++;
-                        }
-                    })
+            $.getJSON("data.json", function (data) {
+                model.ResponseData = data;
+                model.ResponseData.forEach(function (e, ind) {
+                    var score = 0;
+                    for (var i = 0; i < textSplit.length; i++) {
+                        e.Keyword.forEach(function (el) {
+                            if (el.toLowerCase() == textSplit[i]) {
+                                score++;
+                            }
+                        })
+                    }
+                    var obj = {
+                        'index': ind,
+                        'score': score
+                    };
+                    scoreList.push(obj);
+                })
+                console.log(scoreList);
+
+                var max = 0;
+                var _index = 0;
+                scoreList.forEach(function (obj) {
+                    if (obj.score > max) {
+                        max = obj.score;
+                        _index = obj.index;
+                    }
+                });
+                response = model.ResponseData[_index].Value;
+
+                if (!response) {
+                    return `I found some information for ${rawText}`;
                 }
-                var obj = {
-                    'index': ind,
-                    'score': score
-                };
-                scoreList.push(obj);
+                return response;
             })
-            console.log(scoreList);
-
-            var max = 0;
-            var _index = 0;
-            scoreList.forEach(function (obj) {
-                if (obj.score > max) {
-                    max = obj.score;
-                    _index = obj.index;
-                }
-            });
-            response = model.ResponseData[_index].Value;
-
-            if (!response) {
-                return `I found some information for ${rawText}`;
-            }
-            return response;
         }
     </script>
 </body>

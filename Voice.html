@@ -123,7 +123,7 @@
             position: relative;
             height: 47px;
             padding-top: 10px;
-            padding-right: 50px;
+            padding-right: 60px;
             padding-bottom: 10px;
             padding-left: 15px;
             border: none;
@@ -161,16 +161,25 @@
             color: #ccc;
         }
 
-        .chat-submit {
-
+        .chat-send {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: transparent;
-            box-shadow: none;
-            border: none;
-            border-radius: 50%;
-            color: #5A5EB9;
+    bottom: 10px;
+    right: 35px;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    border-radius: 50%;
+    color: #5A5EB9;
+        }
+        .chat-submit {
+            position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    border-radius: 50%;
+    color: #5A5EB9;
         }
 
         .chat-logs {
@@ -307,9 +316,11 @@
             </div>
             <div class="chat-input">
                 <form>
-                    <input type="text" id="chat-input" placeholder="Send a Query..." disabled />
-                    <div class="chat-submit" id="chat-submit" style="cursor: pointer;text-align: center;"><i
-                            class="fa fa-microphone" style="font-size: 25px;"></i></div>
+                    <input type="text" id="chat-input" placeholder="Send a Query..." />
+                    <div class="chat-send" id="chat-send" style="cursor: pointer;text-align: center;"><i
+                            class="fa fa-play" style="font-size: 18px;"></i></div>
+                            <div class="chat-submit" id="chat-submit" style="cursor: pointer;text-align: center;"><i
+                                    class="fa fa-microphone" style="font-size: 18px;"></i></div>
                 </form>
             </div>
         </div>
@@ -318,7 +329,9 @@
         var stopwords = [];
         var model = {};
         model.ResponseData = [];
-
+        $.getJSON('data.json', function (data) {
+                model.ResponseData = data
+            })
         var INDEX = 0;
 
         $("#chat-circle").click(function () {
@@ -434,12 +447,16 @@
         })
 
         var startBtn = $("#chat-submit")[0];
-
+function onInputChat(){
+var value = $('#chat-input').val()
+    generate_message(value, 'self');
+                        var response = process(value)
+                        generate_message(response, 'user');
+}
 
         $(document).ready(function () {
-            $.getJSON('data.json', function (data) {
-                model.ResponseData = data
-            })
+            $('#chat-send').click(onInputChat)
+           
 
 
             const content = document.getElementById('content');

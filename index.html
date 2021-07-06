@@ -177,7 +177,7 @@
 						html += '<li class="list-group-item" title="' + e.address + '-' + e.pincode + '">';
 						var color = e.fee_type == 'Paid' ? 'btn-danger' : 'btn-success';
 						html += '<div>' + e.name;
-						html += '<span class="pull-right badge ' + color + '">' + e.fee_type.charAt(0) + '</span> Rs. '+e.fee;
+						html += '<span class="pull-right"><span class="badge ' + color + '">' + e.fee_type.charAt(0) + '</span> Rs. '+e.fee+'</span>';
 						html += '</div>';
 						html += '<div style="font-size:10px;">' + e.address+'</div>';
 						html += '<div class="pull-left">';

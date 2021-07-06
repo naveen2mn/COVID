@@ -176,9 +176,10 @@
 						//e = onFilter(e);
 						html += '<li class="list-group-item" title="' + e.address + '-' + e.pincode + '">';
 						var color = e.fee_type == 'Paid' ? 'btn-danger' : 'btn-success';
-						html += '<div>' + e.name+' - '+ e.address;
+						html += '<div>' + e.name;
 						html += '<span class="pull-right badge ' + color + '">' + e.fee_type.charAt(0) + '</span>';
 						html += '</div>';
+						html += '<div>' + e.address+'</div>';
 						html += '<div class="pull-left">';
 
 						color = e.min_age_limit == '18' ? 'btn-success' : 'btn-warning';

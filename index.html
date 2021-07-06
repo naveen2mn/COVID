@@ -19,7 +19,7 @@
 	<style>
 		.list-group-item {
 			padding: 2px 4px;
-			height: auto;
+			height: 66px;
 			margin-bottom: 4px;
 		}
 
@@ -177,7 +177,7 @@
 						html += '<li class="list-group-item" title="' + e.address + '-' + e.pincode + '">';
 						var color = e.fee_type == 'Paid' ? 'btn-danger' : 'btn-success';
 						html += '<div>' + e.name;
-						html += '<span class="pull-right badge ' + color + '">' + e.fee_type.charAt(0) + '</span>';
+						html += '<span class="pull-right badge ' + color + '">' + e.fee_type.charAt(0) + '</span> Rs. '+e.fee+';
 						html += '</div>';
 						html += '<div>' + e.address+'</div>';
 						html += '<div class="pull-left">';
